@@ -10,7 +10,7 @@ npm install @mitch528/react-native-grpc
 
 ## Usage
 
-```js
+```ts
 import { GrpcClient, GrpcMetadata } from '@mitch528/react-native-grpc';
 
 GrpcClient.setHost('example.com');
@@ -18,11 +18,11 @@ GrpcClient.setHost('example.com');
 // Bring your own protobuf library
 // This example uses https://github.com/timostamm/protobuf-ts
 
-const message = ExampleMessage.create({
+const request = ExampleRequest.create({
   message: 'Hello World!',
 });
 
-const data: Uint8Array = ExampleMessage.toBinary(message);
+const data: Uint8Array = ExampleRequest.toBinary(request);
 const headers: GrpcMetadata = {};
 
 const { response } = await GrpcClient.unaryCall(

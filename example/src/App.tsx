@@ -1,9 +1,9 @@
+import { GrpcClient } from '@mitch528/react-native-grpc';
 import 'fast-text-encoding';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { GrpcClient } from '@mitch528/react-native-grpc';
 import { RNGrpcTransport } from './transport';
-import { ExampleMessage, ExamplesClient } from './_proto/example';
+import { ExampleRequest, ExamplesClient } from './_proto/example';
 
 export default function App() {
   const [result, setResult] = useState<string>();
@@ -13,13 +13,13 @@ export default function App() {
     GrpcClient.setInsecure(true);
 
     const client = new ExamplesClient(new RNGrpcTransport());
-    const message = ExampleMessage.create({
+    const request = ExampleRequest.create({
       message: 'Hello World',
     });
 
     const abort = new AbortController();
 
-    const unaryCall = client.sendExampleMessage(message, {
+    const unaryCall = client.sendExampleMessage(request, {
       abort: abort.signal,
     });
 

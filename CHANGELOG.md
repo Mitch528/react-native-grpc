@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.3] - 2021-06-23
 
 Fix base64 encoding issue on iOS
 

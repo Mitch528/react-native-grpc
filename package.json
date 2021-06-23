@@ -45,6 +45,7 @@
   },
   "homepage": "https://github.com/Mitch528/react-native-grpc#readme",
   "publishConfig": {
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {

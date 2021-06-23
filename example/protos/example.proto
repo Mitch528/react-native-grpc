@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package example.grpc.service;
+
+option java_multiple_files = true;
+
+service Examples {
+    rpc SendExampleMessage(ExampleRequest) returns (ExampleMessage);
+    rpc GetExampleMessages(ExampleRequest) returns (stream ExampleMessage);
+}
+
+message ExampleRequest {
+  string message = 1;
+}
+
+message ExampleMessage {
+    string message = 1;
+}

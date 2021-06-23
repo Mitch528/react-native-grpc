@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+Fix base64 encoding issue on iOS
+
 ## [0.1.2] - 2021-06-23
 
 Fix incorrect location of types

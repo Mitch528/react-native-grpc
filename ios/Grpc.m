@@ -254,7 +254,7 @@ RCT_EXPORT_METHOD(finishClientStreaming:
                                                                                     NSDictionary *event = @{
                                                                                             @"id": callId,
                                                                                             @"type": @"response",
-                                                                                            @"payload": [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength],
+                                                                                            @"payload": [data base64EncodedStringWithOptions:nil],
                                                                                     };
 
                                                                                     [self sendEventWithName:@"grpc-call" body:event];

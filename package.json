@@ -148,6 +148,7 @@
     ]
   },
   "dependencies": {
-    "abort-controller": "^3.0.0"
+    "abort-controller": "^3.0.0",
+    "eventemitter3": "^4.0.7"
   }
 }

@@ -59,17 +59,17 @@ export class RNGrpcTransport implements RpcTransport {
 
     const outStream = new RpcOutputStreamController<O>();
 
-    call.responses.onData((data) => {
+    call.responses.on('data', (data) => {
       outStream.notifyMessage(method.O.fromBinary(data));
     });
 
-    call.responses.onFinish(() => {
+    call.responses.on('complete', () => {
       if (!outStream.closed) {
         outStream.notifyComplete();
       }
     });
 
-    call.responses.onError(reason => {
+    call.responses.on('error', (reason) => {
       outStream.notifyError(reason);
     });
 

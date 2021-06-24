@@ -9,15 +9,22 @@ export interface GrpcServerInputStream {
 
 export type DataCallback = (data: Uint8Array) => void;
 export type ErrorCallback = (reason: any) => void;
-export type FinishedCallback = () => void;
+export type CompleteCallback = () => void;
+
+export type ServerOutputEvent = 'data' | 'error' | 'complete';
+export type ServerOutputEventCallback<T> = T extends 'data'
+  ? DataCallback
+  : T extends 'complete'
+  ? CompleteCallback
+  : T extends 'error'
+  ? ErrorCallback
+  : never;
 
 export interface GrpcServerOutputStream {
-  onData(callback: DataCallback): RemoveListener;
-  onFinish(callback: FinishedCallback): RemoveListener;
-  onError(callback: ErrorCallback): RemoveListener;
-  notifyData(data: Uint8Array): void;
-  notifyFinish(): void;
-  noitfyError(reason: any): void;
+  on<T extends ServerOutputEvent>(
+    event: T,
+    callback: ServerOutputEventCallback<T>
+  ): RemoveListener;
 }
 
 export type GrpcUnaryResponse = {

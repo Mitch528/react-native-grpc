@@ -1,12 +1,12 @@
 /* eslint-disable eslint-comments/no-unlimited-disable */
 import { AbortController } from 'abort-controller';
+import { EventEmitter } from 'eventemitter3';
 import {
   CompletedGrpcStreamingCall,
-  DataCallback,
-  ErrorCallback,
-  FinishedCallback,
   GrpcMetadata,
   GrpcServerOutputStream,
+  ServerOutputEvent,
+  ServerOutputEventCallback,
 } from './types';
 
 /* eslint-disable */
@@ -81,48 +81,25 @@ export class GrpcServerStreamingCall
 }
 
 export class ServerOutputStream implements GrpcServerOutputStream {
-  #callbacks: {
-    data: DataCallback[];
-    finish: FinishedCallback[];
-    error: ErrorCallback[];
-  } = {
-      data: [],
-      finish: [],
-      error: []
-    };
+  #emitter = new EventEmitter<ServerOutputEvent>();
 
-  onData(callback: DataCallback) {
-    return this.addCallback(this.#callbacks.data, callback);
-  }
-  onFinish(callback: FinishedCallback) {
-    return this.addCallback(this.#callbacks.finish, callback);
-  }
+  on<T extends ServerOutputEvent>(event: T, callback: ServerOutputEventCallback<T>) {
+    this.#emitter.addListener(event, callback);
 
-  onError(callback: ErrorCallback) {
-    return this.addCallback(this.#callbacks.error, callback);
+    return () => {
+      this.#emitter.removeListener(event, callback);
+    }
   }
 
   notifyData(data: Uint8Array): void {
-    this.#callbacks.data.forEach(c => c(data));
+    this.#emitter.emit('data', data);
   }
 
-  notifyFinish(): void {
-    this.#callbacks.finish.forEach(c => c());
+  notifyComplete(): void {
+    this.#emitter.emit('complete')
   }
 
-  noitfyError(reason: any) {
-    this.#callbacks.error.forEach(e => e(reason));
-  }
-
-  private addCallback<C>(arr: C[], callback: C) {
-    arr.push(callback);
-
-    return () => {
-      const index = arr.indexOf(callback);
-
-      if (index > -1) {
-        arr.splice(index, 1);
-      }
-    };
+  noitfyError(reason: any): void {
+    this.#emitter.emit('error', reason);
   }
 }

@@ -135,7 +135,7 @@ function handleGrpcEvent(event: GrpcEvent) {
         break;
       case 'trailers':
         deferred.trailers?.resolve(event.payload);
-        deferred.data?.notifyFinish();
+        deferred.data?.notifyComplete();
 
         delete deferredMap[event.id];
         break;

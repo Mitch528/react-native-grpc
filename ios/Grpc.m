@@ -222,8 +222,6 @@ RCT_EXPORT_METHOD(finishClientStreaming:
     if (call != nil) {
         [call finish];
 
-        [calls removeObjectForKey:callId];
-
         resolve([NSNumber numberWithBool:true]);
     } else {
         resolve([NSNumber numberWithBool:false]);
@@ -264,6 +262,8 @@ RCT_EXPORT_METHOD(finishClientStreaming:
                                                                                     }
                                                                                 }
                                                                                   closeCallback:^(NSDictionary *trailingMetadata, NSError *error) {
+                                                                                      [calls removeObjectForKey:callId];
+
                                                                                       if (error != nil) {
                                                                                           if (self->hasListeners) {
                                                                                               NSDictionary *event = @{

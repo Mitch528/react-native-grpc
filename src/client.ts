@@ -1,6 +1,7 @@
 import { AbortController, AbortSignal } from 'abort-controller';
 import { fromByteArray, toByteArray } from 'base64-js';
 import { NativeEventEmitter, NativeModules } from 'react-native';
+import { GrpcError } from './errors';
 import {
   GrpcServerStreamingCall,
   ServerOutputStream,
@@ -139,12 +140,11 @@ function handleGrpcEvent(event: GrpcEvent) {
         delete deferredMap[event.id];
         break;
       case 'error':
-        const error = {
-          error: event.error,
-          code: event.code,
-        };
+        const error = new GrpcError(event.error, event.code);
 
+        deferred.headers?.reject(error);
         deferred.trailers?.reject(error);
+        deferred.response?.reject(error);
         deferred.data?.noitfyError(error);
 
         delete deferredMap[event.id];

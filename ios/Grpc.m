@@ -238,26 +238,30 @@ RCT_EXPORT_METHOD(finishClientStreaming:
     GRPCCallOptions *callOptions = [self getCallOptionsWithHeaders:headers];
 
     GrpcResponseHandler *handler = [[GrpcResponseHandler alloc] initWithInitialMetadataCallback:^(NSDictionary *initialMetadata) {
-                NSDictionary *responseHeaders = [[NSDictionary alloc] initWithDictionary:initialMetadata];
+                if (self->hasListeners) {
+                    NSDictionary *responseHeaders = [[NSDictionary alloc] initWithDictionary:initialMetadata];
 
-                NSDictionary *event = @{
-                        @"id": callId,
-                        @"type": @"headers",
-                        @"payload": responseHeaders,
-                };
+                    NSDictionary *event = @{
+                            @"id": callId,
+                            @"type": @"headers",
+                            @"payload": responseHeaders,
+                    };
 
-                [self sendEventWithName:@"grpc-call" body:event];
+                    [self sendEventWithName:@"grpc-call" body:event];
+                }
             }
                                                                                 messageCallback:^(id message) {
                                                                                     NSData *data = (NSData *) message;
 
-                                                                                    NSDictionary *event = @{
-                                                                                            @"id": callId,
-                                                                                            @"type": @"response",
-                                                                                            @"payload": [data base64EncodedStringWithOptions:nil],
-                                                                                    };
+                                                                                    if (self->hasListeners) {
+                                                                                        NSDictionary *event = @{
+                                                                                                @"id": callId,
+                                                                                                @"type": @"response",
+                                                                                                @"payload": [data base64EncodedStringWithOptions:nil],
+                                                                                        };
 
-                                                                                    [self sendEventWithName:@"grpc-call" body:event];
+                                                                                        [self sendEventWithName:@"grpc-call" body:event];
+                                                                                    }
                                                                                 }
                                                                                   closeCallback:^(NSDictionary *trailingMetadata, NSError *error) {
                                                                                       if (error != nil) {

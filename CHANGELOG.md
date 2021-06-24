@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Breaking
+
+Changed server output stream functions `onData(callback)`, `onFinish(callback)`, `onError(callback)` to `on(type, callback)`
+
+### Improvements
+
+Errors should be more descriptive than 'aborted'.
+
 ## [0.1.3] - 2021-06-23
 
 Fix base64 encoding issue on iOS

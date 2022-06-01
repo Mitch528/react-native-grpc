@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Improvements
+
+Add trailers to GrpcError
+
+### Bugfixes
+
+Fix binary data contained within metadata
+
 ## [0.1.4] - 2021-06-24
 
 ### Breaking

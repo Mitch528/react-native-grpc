@@ -51,6 +51,7 @@ type GrpcEventPayload =
     type: 'error';
     error: string;
     code?: number;
+    trailers?: GrpcMetadata;
   } | {
     type: 'headers';
     payload: GrpcMetadata;
@@ -140,7 +141,7 @@ function handleGrpcEvent(event: GrpcEvent) {
         delete deferredMap[event.id];
         break;
       case 'error':
-        const error = new GrpcError(event.error, event.code);
+        const error = new GrpcError(event.error, event.code, event.trailers);
 
         deferred.headers?.reject(error);
         deferred.trailers?.reject(error);

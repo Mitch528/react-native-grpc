@@ -173,7 +173,15 @@ public class GrpcModule extends ReactContextBaseJavaModule {
         WritableMap payload = Arguments.createMap();
 
         for (String key : headers.keys()) {
-          payload.putString(key, headers.get(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)));
+          if (key.endsWith("-bin")) {
+            byte[] data = headers.get(Metadata.Key.of(key, Metadata.BINARY_BYTE_MARSHALLER));
+
+            payload.putString(key, new String(Base64.encode(data, Base64.NO_WRAP)));
+          } else {
+            String data = headers.get(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER));
+
+            payload.putString(key, data);
+          }
         }
 
         event.putInt("id", id);
@@ -211,20 +219,28 @@ public class GrpcModule extends ReactContextBaseJavaModule {
         WritableMap event = Arguments.createMap();
         event.putInt("id", id);
 
+        WritableMap trailersMap = Arguments.createMap();
+
+        for (String key : trailers.keys()) {
+          if (key.endsWith("-bin")) {
+            byte[] data = trailers.get(Metadata.Key.of(key, Metadata.BINARY_BYTE_MARSHALLER));
+
+            trailersMap.putString(key, new String(Base64.encode(data, Base64.NO_WRAP)));
+          } else {
+            String data = trailers.get(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER));
+
+            trailersMap.putString(key, data);
+          }
+        }
+
         if (!status.isOk()) {
           event.putString("type", "error");
           event.putString("error", status.asException(trailers).getLocalizedMessage());
           event.putInt("code", status.getCode().value());
+          event.putMap("trailers", trailersMap);
         } else {
           event.putString("type", "trailers");
-
-          WritableMap payload = Arguments.createMap();
-
-          for (String key : trailers.keys()) {
-            payload.putString(key, trailers.get(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)));
-          }
-
-          event.putMap("payload", payload);
+          event.putMap("payload", trailersMap);
         }
 
         emitEvent("grpc-call", event);

@@ -3,7 +3,8 @@ import 'fast-text-encoding';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RNGrpcTransport } from './transport';
-import { ExampleRequest, ExamplesClient } from './_proto/example';
+import { ExampleRequest } from './_proto/example';
+import { ExamplesClient } from './_proto/example.client';
 
 export default function App() {
   const [result, setResult] = useState<string>();

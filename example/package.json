@@ -10,8 +10,8 @@
     "build:proto": "./protogen.sh"
   },
   "dependencies": {
-    "@protobuf-ts/runtime": "^1.0.13",
-    "@protobuf-ts/runtime-rpc": "^1.0.13",
+    "@protobuf-ts/runtime": "^2.6.0",
+    "@protobuf-ts/runtime-rpc": "^2.6.0",
     "fast-text-encoding": "^1.0.3",
     "react": "17.0.2",
     "react-native": "0.64.2"
@@ -19,7 +19,7 @@
   "devDependencies": {
     "@babel/core": "^7.14.6",
     "@babel/runtime": "^7.14.6",
-    "@protobuf-ts/plugin": "^1.0.13",
+    "@protobuf-ts/plugin": "^2.6.0",
     "babel-plugin-module-resolver": "^4.1.0",
     "metro": "^0.66.0",
     "metro-react-native-babel-preset": "^0.66.0"

@@ -1174,40 +1174,41 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@protobuf-ts/plugin-framework@^1.0.13":
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/plugin-framework/-/plugin-framework-1.0.13.tgz#086317665c73b970ad4ddaef6aadf03baa24597b"
-  integrity sha512-Wvopo8tKh+lfqZK2A7kEygYhvsTMcbzm7r78mBylMBYBNY31ojwW00koF2Tgb0RZ0yGGUik/pWb6P2DWEiRB1g==
+"@protobuf-ts/plugin-framework@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@protobuf-ts/plugin-framework/-/plugin-framework-2.6.0.tgz#b65c57a51e63d6e008c9dc79992baf9727e2fba9"
+  integrity sha512-CHTPpwjX9VlidutYpDeYGLYwJp4+RrZQCL3fUudmUezW5rj3uA3+7v3iKPt9rS9RegfZQvBFOW42wWF0O/82ag==
   dependencies:
-    "@protobuf-ts/runtime" "^1.0.13"
-    typescript ">=3.8.3 <4"
+    "@protobuf-ts/runtime" "^2.6.0"
+    typescript "^3.9"
 
-"@protobuf-ts/plugin@^1.0.13":
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/plugin/-/plugin-1.0.13.tgz#691c9ade5dd22be92c0b07dc9a1c09f11e7b9306"
-  integrity sha512-1jUJ+EYa57YVJhmgroA6y5CJ+vFvbOI9rdOKXx/Q5ngbT6QnKvZHCD3lImjtfGIO92VqcxJVZj2uch3qykSIlA==
+"@protobuf-ts/plugin@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@protobuf-ts/plugin/-/plugin-2.6.0.tgz#23475432e0029594cb814df7ad6b4125ac6a7af4"
+  integrity sha512-95Nf4mT2FzVvDE5nvWrd6SHpOX5VNBUVEujtnC4mTRfvsTwZWfiE+ZtoMHxpHQBMNrs28T69yGeFWrr6qLP4Wg==
   dependencies:
-    "@protobuf-ts/plugin-framework" "^1.0.13"
-    "@protobuf-ts/protoc" "^1.0.13"
-    "@protobuf-ts/runtime" "^1.0.13"
-    typescript ">=3.8.3 <4"
+    "@protobuf-ts/plugin-framework" "^2.6.0"
+    "@protobuf-ts/protoc" "^2.6.0"
+    "@protobuf-ts/runtime" "^2.6.0"
+    "@protobuf-ts/runtime-rpc" "^2.6.0"
+    typescript "^3.9"
 
-"@protobuf-ts/protoc@^1.0.13":
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/protoc/-/protoc-1.0.13.tgz#7bbceaedd6af11b26665b3b503d8dd02785107e0"
-  integrity sha512-lkHJ1va6473+mP3OJvVs0ioXeiuNpyDXfDPbfqgRCgqRQwqHhAmtj5OnlHrPopIKVX+Y9oW8bc2xityOt4HVLg==
+"@protobuf-ts/protoc@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@protobuf-ts/protoc/-/protoc-2.6.0.tgz#413d022dcf2138e0dd2c3a80a326cfdc72e2cbaf"
+  integrity sha512-Y+B3yn6jm9Mz1au4JJrADKpGmezlf9zv4S6bO3i8oJhOitEiFYHw3VdAbwJ+qqyHMe4KlgpzkiyO0uY8yeYN8g==
 
-"@protobuf-ts/runtime-rpc@^1.0.13":
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/runtime-rpc/-/runtime-rpc-1.0.13.tgz#67a6bfc4e2c2c0d134c1cf7c82b8d59618a4d4c1"
-  integrity sha512-ct/fCm3UJk/sg3yKpvCd6ylbRVkj+LiV+xD95BWTw0w4t/29VYwT8MhZqlJbN0qSfkkH4/jWTrwv9yePDEjPWg==
+"@protobuf-ts/runtime-rpc@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@protobuf-ts/runtime-rpc/-/runtime-rpc-2.6.0.tgz#66fbcf6d9b0ad0d5b892d86ef4e1fbd17516a26e"
+  integrity sha512-PUAUUI4NJgg/3i0mfyxzrBsIs+V3/B+ybG2sDSf6mZhPYRZkUFBQqmnaFGx3UHOAU0JORqAIFC1dac6bUjaauw==
   dependencies:
-    "@protobuf-ts/runtime" "^1.0.13"
+    "@protobuf-ts/runtime" "^2.6.0"
 
-"@protobuf-ts/runtime@^1.0.13":
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/@protobuf-ts/runtime/-/runtime-1.0.13.tgz#42d6d84ea6f0ded68d6642ab64ca49f7c17f6e71"
-  integrity sha512-uvYYBUtG4eCYMxo+mzxN8SHvpL/l7PbHEmOpXEnDCwBj/wJ+Ezj8+TlEFjjRWpnFidka+SMdDOXPWSyJv2iNAw==
+"@protobuf-ts/runtime@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@protobuf-ts/runtime/-/runtime-2.6.0.tgz#d823470768383c0657cdc87a745c19af5ef63550"
+  integrity sha512-ZXQxypattRL87U9Ki+unh2en+REp8m+VZDTCHHHt1gqTZpjbUn2zzELkSEmli+4WKWPEZRExIhzfAUz0xRskJQ==
 
 "@react-native-community/cli-debugger-ui@^5.0.1":
   version "5.0.1"
@@ -4726,7 +4727,7 @@ type-fest@^0.7.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.7.1.tgz#8dda65feaf03ed78f0a3f9678f1869147f7c5c48"
   integrity sha512-Ne2YiiGN8bmrmJJEuTWTLJR32nh/JdL1+PSicowtNb0WFpn59GK8/lfD61bVtzguz7b3PBt74nxpv/Pw5po5Rg==
 
-"typescript@>=3.8.3 <4":
+typescript@^3.9:
   version "3.9.10"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.10.tgz#70f3910ac7a51ed6bef79da7800690b19bf778b8"
   integrity sha512-w6fIxVE/H1PkLKcCPsFqKE7Kv7QUwhU8qQY2MueZXWx5cPZdwFupLgKK3vntcK98BtNHZtAF4LA/yl2a7k8R6Q==

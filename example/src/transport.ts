@@ -1,5 +1,5 @@
 /* eslint-disable eslint-comments/no-unlimited-disable */
-import { ClientStreamingCall, DuplexStreamingCall, mergeExtendedRpcOptions, MethodInfo, RpcOptions, RpcOutputStreamController, RpcStatus, RpcTransport, ServerStreamingCall, UnaryCall } from '@protobuf-ts/runtime-rpc';
+import { ClientStreamingCall, DuplexStreamingCall, mergeRpcOptions, MethodInfo, RpcOptions, RpcOutputStreamController, RpcStatus, RpcTransport, ServerStreamingCall, UnaryCall } from '@protobuf-ts/runtime-rpc';
 import { GrpcClient, GrpcMetadata } from '@mitch528/react-native-grpc';
 import { AbortSignal } from 'abort-controller';
 
@@ -11,7 +11,7 @@ function makePath(method: MethodInfo): string {
 
 export class RNGrpcTransport implements RpcTransport {
   mergeOptions(options?: Partial<RpcOptions>): RpcOptions {
-    return mergeExtendedRpcOptions({}, options);
+    return mergeRpcOptions({}, options);
   }
   unary<I extends object, O extends object>(method: MethodInfo<I, O>, input: I, options: RpcOptions): UnaryCall<I, O> {
     const headers = options.meta || {};

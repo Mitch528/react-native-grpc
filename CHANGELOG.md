@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Bugfixes
+
+Fix trailers not being sent
+
 ## [0.1.5] - 2022-06-01
 
 ### Improvements

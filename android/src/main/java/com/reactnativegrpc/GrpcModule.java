@@ -30,6 +30,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
   private String host;
   private boolean isInsecure = false;
+  private ManagedChannel managedChannel = null;
 
   public GrpcModule(ReactApplicationContext context) {
     this.context = context;
@@ -143,14 +144,6 @@ public class GrpcModule extends ReactContextBaseJavaModule {
       headersMetadata.put(Metadata.Key.of(headerEntry.getKey(), Metadata.ASCII_STRING_MARSHALLER), headerEntry.getValue().toString());
     }
 
-    ManagedChannelBuilder channelBuilder = ManagedChannelBuilder.forTarget(this.host);
-
-    if (this.isInsecure) {
-      channelBuilder = channelBuilder.usePlaintext();
-    }
-
-    ManagedChannel channel = channelBuilder.build();
-
     MethodDescriptor.Marshaller<byte[]> marshaller = new GrpcMarshaller();
 
     MethodDescriptor descriptor = MethodDescriptor.<byte[], byte[]>newBuilder()
@@ -162,7 +155,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
     CallOptions callOptions = CallOptions.DEFAULT;
 
-    ClientCall call = channel.newCall(descriptor, callOptions);
+    ClientCall call = this.getManagedChannel().newCall(descriptor, callOptions);
 
     call.start(new ClientCall.Listener() {
       @Override
@@ -262,5 +255,18 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     }
 
     return path;
+  }
+
+  private ManagedChannel getManagedChannel(){
+    if (managedChannel != null) return managedChannel;
+
+    ManagedChannelBuilder channelBuilder = ManagedChannelBuilder.forTarget(this.host);
+
+    if (this.isInsecure) {
+      channelBuilder = channelBuilder.usePlaintext();
+    }
+
+    managedChannel = channelBuilder.build();
+    return managedChannel;
   }
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Bugfixes
+
+Reuse Android ManagedChannel for gRPC calls
+
 ## [0.1.6] - 2022-06-09
 
 ### Bugfixes

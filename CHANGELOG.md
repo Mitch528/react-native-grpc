@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Bugfixes
+
+Fix error code not being provided on iOS
+
 ## [0.1.7] - 2022-08-07
 
 ### Bugfixes

@@ -284,6 +284,7 @@ RCT_EXPORT_METHOD(finishClientStreaming:
                                                                                                       @"id": callId,
                                                                                                       @"type": @"error",
                                                                                                       @"error": error.localizedDescription,
+                                                                                                      @"code": [NSNumber numberWithLong:error.code],
                                                                                                       @"trailers": responseTrailers,
                                                                                               };
 

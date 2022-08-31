@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+Added option to set the maximum response size limit on the gRPC client.
+
 ## [0.1.8] - 2022-08-16
 
 ### Bugfixes

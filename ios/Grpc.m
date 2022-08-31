@@ -113,7 +113,11 @@
     GRPCMutableCallOptions *options = [[GRPCMutableCallOptions alloc] init];
     options.initialMetadata = headers;
     options.transport = self.grpcInsecure ? GRPCDefaultTransportImplList.core_insecure : GRPCDefaultTransportImplList.core_secure;
-
+    
+    if (self.grpcResponseSizeLimit != nil) {
+        options.responseSizeLimit = self.grpcResponseSizeLimit.unsignedLongValue;
+    }
+    
     return options;
 }
 
@@ -136,6 +140,11 @@ RCT_EXPORT_METHOD(setHost:
 RCT_EXPORT_METHOD(setInsecure:
     (nonnull NSNumber*) insecure) {
     self.grpcInsecure = [insecure boolValue];
+}
+
+RCT_EXPORT_METHOD(setResponseSizeLimit:
+    (nonnull NSNumber*) limit) {
+    self.grpcResponseSizeLimit = limit;
 }
 
 RCT_EXPORT_METHOD(unaryCall:

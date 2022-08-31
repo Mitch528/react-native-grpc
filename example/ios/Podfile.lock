@@ -600,7 +600,7 @@ PODS:
     - React-jsi (= 0.64.2)
     - React-perflogger (= 0.64.2)
   - React-jsinspector (0.64.2)
-  - react-native-grpc (0.1.0):
+  - react-native-grpc (0.1.8):
     - gRPC
     - React-Core
   - React-perflogger (0.64.2)
@@ -793,7 +793,7 @@ SPEC CHECKSUMS:
   React-jsi: 67747b9722f6dab2ffe15b011bcf6b3f2c3f1427
   React-jsiexecutor: 80c46bd381fd06e418e0d4f53672dc1d1945c4c3
   React-jsinspector: cc614ec18a9ca96fd275100c16d74d62ee11f0ae
-  react-native-grpc: 5e6174eff0c19d008367cfae0bcbb6f718892c46
+  react-native-grpc: 47efe9c810f04cea7f329cf100abc485cbc09471
   React-perflogger: 25373e382fed75ce768a443822f07098a15ab737
   React-RCTActionSheet: af7796ba49ffe4ca92e7277a5d992d37203f7da5
   React-RCTAnimation: 6a2e76ab50c6f25b428d81b76a5a45351c4d77aa
@@ -810,4 +810,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 81550e033afee123558020d515e368523e4f2aea
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.3

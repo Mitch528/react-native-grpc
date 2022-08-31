@@ -18,6 +18,7 @@ type GrpcType = {
   getIsInsecure: () => Promise<boolean>;
   setHost(host: string): void;
   setInsecure(insecure: boolean): void;
+  setResponseSizeLimit(limitInBytes: number): void;
   unaryCall(
     id: number,
     path: string,
@@ -176,6 +177,9 @@ export class GrpcClient {
   }
   setInsecure(insecure: boolean): void {
     Grpc.setInsecure(insecure);
+  }
+  setResponseSizeLimit(limitInBytes: number): void {
+    Grpc.setResponseSizeLimit(limitInBytes);
   }
   unaryCall(
     method: string,

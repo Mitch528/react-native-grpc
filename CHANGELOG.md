@@ -1,5 +1,11 @@
 # Changelog
 
+### [Unreleased]
+
+### Improvements
+
+Implemented maximum response size limit for gRPC client on Android
+
 ## [0.1.9] - 2022-08-31
 
 ### Added

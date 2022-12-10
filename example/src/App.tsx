@@ -1,5 +1,5 @@
+import 'text-encoding';
 import { GrpcClient } from '@mitch528/react-native-grpc';
-import 'fast-text-encoding';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RNGrpcTransport } from './transport';

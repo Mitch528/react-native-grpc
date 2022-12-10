@@ -123,8 +123,8 @@ repositories {
 
 dependencies {
   // noinspection GradleDynamicVersion
-  implementation 'io.grpc:grpc-okhttp:1.38.0'// CURRENT_GRPC_VERSION
-  implementation 'io.grpc:grpc-stub:1.38.0' // CURRENT_GRPC_VERSION
+  implementation 'io.grpc:grpc-okhttp:1.51.0'// CURRENT_GRPC_VERSION
+  implementation 'io.grpc:grpc-stub:1.51.0' // CURRENT_GRPC_VERSION
 
   api 'com.facebook.react:react-native:+'
 }

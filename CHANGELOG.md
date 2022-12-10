@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Breaking
+
+Now using gRPC-Swift on iOS
+
 ### [0.1.10] - 2022-09-01
 
 ### Improvements

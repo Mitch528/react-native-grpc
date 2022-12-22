@@ -30,6 +30,8 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
   private String host;
   private boolean isInsecure = false;
+  private boolean withComparison = false;
+  private String compressorName = "";
   private Integer responseSizeLimit = null;
   private ManagedChannel managedChannel = null;
 
@@ -61,6 +63,12 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void setInsecure(boolean insecure) {
     this.isInsecure = insecure;
+  }
+
+  @ReactMethod
+  public void setCompression(Boolean enable, String compressorName) {
+    this.withComparison = enable;
+    this.compressorName = compressorName;
   }
 
   @ReactMethod
@@ -161,6 +169,10 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
     CallOptions callOptions = CallOptions.DEFAULT;
 
+    if (!this.compressorName.isEmpty()) {
+      callOptions = callOptions.withCompression(this.compressorName);
+    }
+
     ClientCall call = this.getManagedChannel().newCall(descriptor, callOptions);
 
     call.start(new ClientCall.Listener() {
@@ -245,6 +257,10 @@ public class GrpcModule extends ReactContextBaseJavaModule {
         emitEvent("grpc-call", event);
       }
     }, headersMetadata);
+
+    if (this.withComparison) {
+      call.setMessageCompression(true);
+    }
 
     return call;
   }

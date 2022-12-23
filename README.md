@@ -5,7 +5,7 @@ gRPC for react-native
 ## Installation
 
 ```sh
-npm install @mitch528/react-native-grpc
+npm npm i @krishnafkh/react-native-grpc
 ```
 
 ## Usage

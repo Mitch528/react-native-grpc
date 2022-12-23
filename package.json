@@ -1,6 +1,6 @@
 {
-  "name": "@mitch528/react-native-grpc",
-  "version": "1.0.0-1",
+  "name": "krishnafkh/react-native-grpc",
+  "version": "1.0.2",
   "description": "gRPC for react-native",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -38,13 +38,13 @@
     "android",
     "grpc"
   ],
-  "repository": "https://github.com/Mitch528/react-native-grpc",
-  "author": "Mitch528 <mitch528@gmail.com> (https://github.com/Mitch528)",
+  "repository": "https://github.com/krishnafkh/react-native-grpc",
+  "author": "Krishna <krishnamani.s@flipkart.com> (https://github.com/krishnafkh/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Mitch528/react-native-grpc/issues"
+    "url": "https://github.com/krishnafkh/react-native-grpc/issues"
   },
-  "homepage": "https://github.com/Mitch528/react-native-grpc#readme",
+  "homepage": "https://github.com/krishnafkh/react-native-grpc#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

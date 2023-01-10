@@ -21,6 +21,10 @@ class RNGrpc: RCTEventEmitter {
     var grpcResponseSizeLimit: Int?
     var calls = [Int: GrpcCall]()
 
+    deinit {
+        try! group.syncShutdownGracefully()
+    }
+
     @objc
     public func setInsecure(_ insecure: NSNumber) {
         self.grpcInsecure = insecure.boolValue

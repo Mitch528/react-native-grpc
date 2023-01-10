@@ -259,7 +259,7 @@ PODS:
   - React-jsinspector (0.70.6)
   - React-logger (0.70.6):
     - glog
-  - react-native-grpc (0.1.10):
+  - react-native-grpc (1.0.0-1):
     - gRPC-Swift
     - React-Core
   - React-perflogger (0.70.6)
@@ -637,7 +637,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: b4a65947391c658450151275aa406f2b8263178f
   React-jsinspector: 60769e5a0a6d4b32294a2456077f59d0266f9a8b
   React-logger: 1623c216abaa88974afce404dc8f479406bbc3a0
-  react-native-grpc: 7af22aeefb5250c0de24261326b02bb4d69e7566
+  react-native-grpc: 328ef8ca6228c1a408dc0ebe3d0d5eab949fd13a
   React-perflogger: 8c79399b0500a30ee8152d0f9f11beae7fc36595
   React-RCTActionSheet: 7316773acabb374642b926c19aef1c115df5c466
   React-RCTAnimation: 5341e288375451297057391227f691d9b2326c3d

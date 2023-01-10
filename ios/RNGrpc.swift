@@ -186,7 +186,7 @@ class RNGrpc: RCTEventEmitter {
         let payload = ByteBuffer(data: data)
 
         let headerDict = headers.allKeys.map {
-            (String(describing: $0), String(describing: headers[$0]))
+            (String(describing: $0), String(describing: headers[$0]!))
         }
 
         let options = self.getCallOptionsWithHeaders(headers: HPACKHeaders(headerDict))

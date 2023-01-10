@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Bug fixes
+
+Fix passed header value being invalid by unwrapping the `String` on iOS
+
 ## [1.0.0-1] - 2022-12-10
 
 ### Bugfixes

@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+Added option to enable gRPC compression
+
+---
+
+Thanks to @krishnafkh for contributing the Android implementation (#5)
+
 ## [1.0.0-2] - 2023-01-10
 
 ### Bug fixes

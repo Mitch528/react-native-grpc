@@ -139,18 +139,13 @@ function handleGrpcEvent(event: GrpcEvent) {
       case 'trailers':
         deferred.trailers?.resolve(event.payload);
         deferred.data?.notifyComplete();
-
-        delete deferredMap[event.id];
         break;
       case 'error':
         const error = new GrpcError(event.error, event.code, event.trailers);
 
-        deferred.headers?.reject(error);
-        deferred.trailers?.reject(error);
         deferred.response?.reject(error);
         deferred.data?.noitfyError(error);
 
-        delete deferredMap[event.id];
         break;
     }
   }

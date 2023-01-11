@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Bugfixes
+
+Fix incorrect status code given on iOS on failure
+
 ## [1.0.0-3] - 2023-01-11
 
 ### Added

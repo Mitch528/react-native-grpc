@@ -184,11 +184,11 @@ public class GrpcModule extends ReactContextBaseJavaModule {
         WritableMap payload = Arguments.createMap();
 
         for (String key : headers.keys()) {
-          if (key.endsWith("-bin")) {
+          if (key.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
             byte[] data = headers.get(Metadata.Key.of(key, Metadata.BINARY_BYTE_MARSHALLER));
 
             payload.putString(key, new String(Base64.encode(data, Base64.NO_WRAP)));
-          } else {
+          } else if (!key.startsWith(":")) {
             String data = headers.get(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER));
 
             payload.putString(key, data);
@@ -233,11 +233,11 @@ public class GrpcModule extends ReactContextBaseJavaModule {
         WritableMap trailersMap = Arguments.createMap();
 
         for (String key : trailers.keys()) {
-          if (key.endsWith("-bin")) {
+          if (key.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
             byte[] data = trailers.get(Metadata.Key.of(key, Metadata.BINARY_BYTE_MARSHALLER));
 
             trailersMap.putString(key, new String(Base64.encode(data, Base64.NO_WRAP)));
-          } else {
+          } else if (!key.startsWith(":")) {
             String data = trailers.get(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER));
 
             trailersMap.putString(key, data);

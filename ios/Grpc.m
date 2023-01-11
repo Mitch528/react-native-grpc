@@ -12,6 +12,10 @@ RCT_EXTERN_METHOD(setResponseSizeLimit:
 RCT_EXTERN_METHOD(setHost:
     (NSString *) host)
 
+RCT_EXTERN_METHOD(setCompression:
+    (nonnull NSNumber*)enabled
+        compressorName: (NSString *) compressorName)
+
 RCT_EXTERN_METHOD(getIsInsecure:
     (RCTPromiseResolveBlock) resolve reject:
     (RCTPromiseRejectBlock) reject)

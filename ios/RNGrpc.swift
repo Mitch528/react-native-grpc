@@ -19,6 +19,8 @@ class RNGrpc: RCTEventEmitter {
     var grpcInsecure = false
     var grpcHost: String?
     var grpcResponseSizeLimit: Int?
+    var grpcCompression: Bool?
+    var grpcCompressorName: String?
     var calls = [Int: GrpcCall]()
 
     deinit {
@@ -36,6 +38,12 @@ class RNGrpc: RCTEventEmitter {
     }
 
     @objc
+    public func setCompression(_ enabled: NSNumber, compressorName: String) {
+        self.grpcCompression = enabled.boolValue
+        self.grpcCompressorName = compressorName
+    }
+
+    @objc
     public func setResponseSizeLimit(_ responseSizeLimit: NSNumber) {
         self.grpcResponseSizeLimit = responseSizeLimit.intValue
     }
@@ -43,7 +51,7 @@ class RNGrpc: RCTEventEmitter {
     @objc
     public func getResponseSizeLimit(_ resolve: @escaping RCTPromiseResolveBlock,
                                      reject: @escaping RCTPromiseRejectBlock) {
-        resolve(self.grpcResponseSizeLimit);
+        resolve(self.grpcResponseSizeLimit)
     }
 
     @objc
@@ -299,9 +307,29 @@ class RNGrpc: RCTEventEmitter {
     }
 
     private func getCallOptionsWithHeaders(headers: HPACKHeaders) -> CallOptions {
-        let encoding = ClientMessageEncoding.enabled(
-                .responsesOnly(acceptable: CompressionAlgorithm.all, decompressionLimit: .ratio(20))
-        )
+        var encoding: ClientMessageEncoding = .disabled
+
+        if let enabled = self.grpcCompression, enabled {
+            let compressionAlgorithm: [CompressionAlgorithm]
+
+            switch self.grpcCompressorName {
+            case "gzip":
+                compressionAlgorithm = [.gzip]
+            case "deflate":
+                compressionAlgorithm = [.deflate]
+            case "identity":
+                compressionAlgorithm = [.identity]
+            default:
+                compressionAlgorithm = CompressionAlgorithm.all
+            }
+
+            encoding = ClientMessageEncoding.enabled(
+                    .init(forRequests: compressionAlgorithm.first,
+                            acceptableForResponses: compressionAlgorithm,
+                            decompressionLimit: .ratio(20)
+                    )
+            )
+        }
 
         return CallOptions(customMetadata: headers, messageEncoding: encoding)
     }

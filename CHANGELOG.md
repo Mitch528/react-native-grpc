@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+Add option to specify compression limit on iOS
+
 ## [1.0.0-4] - 2023-01-11
 
 ### Bugfixes

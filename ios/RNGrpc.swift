@@ -21,6 +21,7 @@ class RNGrpc: RCTEventEmitter {
     var grpcResponseSizeLimit: Int?
     var grpcCompression: Bool?
     var grpcCompressorName: String?
+    var grpcCompressionLimit: Int?
     var calls = [Int: GrpcCall]()
 
     deinit {
@@ -38,9 +39,11 @@ class RNGrpc: RCTEventEmitter {
     }
 
     @objc
-    public func setCompression(_ enabled: NSNumber, compressorName: String) {
+    public func setCompression(_ enabled: NSNumber, compressorName: String,
+                               limit: String?) {
         self.grpcCompression = enabled.boolValue
         self.grpcCompressorName = compressorName
+        self.grpcCompressionLimit = Int(limit ?? "")
     }
 
     @objc
@@ -313,6 +316,7 @@ class RNGrpc: RCTEventEmitter {
 
         if let enabled = self.grpcCompression, enabled {
             let compressionAlgorithm: [CompressionAlgorithm]
+            let limit = self.grpcCompressionLimit ?? .max
 
             switch self.grpcCompressorName {
             case "gzip":
@@ -328,7 +332,7 @@ class RNGrpc: RCTEventEmitter {
             encoding = ClientMessageEncoding.enabled(
                     .init(forRequests: compressionAlgorithm.first,
                             acceptableForResponses: compressionAlgorithm,
-                            decompressionLimit: .ratio(20)
+                            decompressionLimit: .absolute(limit)
                     )
             )
         }

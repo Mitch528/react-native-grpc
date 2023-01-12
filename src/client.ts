@@ -18,7 +18,7 @@ type GrpcType = {
   getIsInsecure: () => Promise<boolean>;
   setHost(host: string): void;
   setInsecure(insecure: boolean): void;
-  setCompression(enable: boolean, compressorName: string): void;
+  setCompression(enable: boolean, compressorName: string, limit?: string): void;
   setResponseSizeLimit(limitInBytes: number): void;
   unaryCall(
     id: number,
@@ -174,8 +174,12 @@ export class GrpcClient {
   setInsecure(insecure: boolean): void {
     Grpc.setInsecure(insecure);
   }
-  setCompression(enable: boolean, compressorName: string): void {
-    Grpc.setCompression(enable, compressorName);
+  setCompression(
+    enable: boolean,
+    compressorName: string,
+    limit?: number
+  ): void {
+    Grpc.setCompression(enable, compressorName, limit?.toString());
   }
   setResponseSizeLimit(limitInBytes: number): void {
     Grpc.setResponseSizeLimit(limitInBytes);

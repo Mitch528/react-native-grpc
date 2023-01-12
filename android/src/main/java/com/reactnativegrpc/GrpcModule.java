@@ -66,7 +66,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void setCompression(Boolean enable, String compressorName) {
+  public void setCompression(Boolean enable, String compressorName, String limit) {
     this.withCompression = enable;
     this.compressorName = compressorName;
   }

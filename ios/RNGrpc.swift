@@ -26,6 +26,7 @@ class RNGrpc: RCTEventEmitter {
     var grpcKeepaliveTime: Int64?
     var grpcKeepaliveTimeout: Int64?
     var calls = [Int: GrpcCall]()
+    var connection: GRPCChannel?
 
     deinit {
         try! group.syncShutdownGracefully()
@@ -34,11 +35,13 @@ class RNGrpc: RCTEventEmitter {
     @objc
     public func setInsecure(_ insecure: NSNumber) {
         self.grpcInsecure = insecure.boolValue
+        self.handleOptionsChange()
     }
 
     @objc
     public func setHost(_ host: String) {
         self.grpcHost = host
+        self.handleOptionsChange()
     }
 
     @objc
@@ -47,17 +50,21 @@ class RNGrpc: RCTEventEmitter {
         self.grpcCompression = enabled.boolValue
         self.grpcCompressorName = compressorName
         self.grpcCompressionLimit = Int(limit ?? "")
+        self.handleOptionsChange()
+    }
 
     @objc
     public func setKeepalive(_ enabled: NSNumber, time: NSNumber, timeout: NSNumber) {
         self.grpcKeepaliveEnabled = enabled.boolValue
         self.grpcKeepaliveTime = time.int64Value
         self.grpcKeepaliveTimeout = timeout.int64Value
+        self.handleOptionsChange()
     }
 
     @objc
     public func setResponseSizeLimit(_ responseSizeLimit: NSNumber) {
         self.grpcResponseSizeLimit = responseSizeLimit.intValue
+        self.handleOptionsChange()
     }
 
     @objc
@@ -195,7 +202,7 @@ class RNGrpc: RCTEventEmitter {
                                      type: GRPCCallType,
                                      path: String,
                                      headers: NSDictionary) throws -> GrpcCall {
-        guard let conn = try createConnection() else {
+        guard let conn = self.connection else {
             throw GrpcError.connectionFailure
         }
 
@@ -347,6 +354,15 @@ class RNGrpc: RCTEventEmitter {
         }
 
         return CallOptions(customMetadata: headers, messageEncoding: encoding)
+    }
+
+    private func handleOptionsChange() {
+        if let conn = self.connection {
+            let loop = self.group.next()
+            conn.closeGracefully(deadline: .distantFuture, promise: loop.makePromise())
+        }
+
+        self.connection = try? self.createConnection()
     }
 
     private func createConnection() throws -> GRPCChannel? {

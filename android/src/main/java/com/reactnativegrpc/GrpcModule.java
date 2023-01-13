@@ -63,28 +63,33 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void setHost(String host) {
     this.host = host;
+    this.handleOptionsChanged();
   }
 
   @ReactMethod
   public void setInsecure(boolean insecure) {
     this.isInsecure = insecure;
+    this.handleOptionsChanged();
   }
 
   @ReactMethod
   public void setCompression(Boolean enable, String compressorName, String limit) {
     this.withCompression = enable;
     this.compressorName = compressorName;
+    this.handleOptionsChanged();
   }
 
   @ReactMethod
   public void setResponseSizeLimit(int limit) {
     this.responseSizeLimit = limit;
+    this.handleOptionsChanged();
   }
 
   public void setKeepalive(boolean enabled, int time, int timeout) {
     this.keepAliveEnabled = enabled;
     this.keepAliveTime = time;
     this.keepAliveTimeout = timeout;
+    this.handleOptionsChanged();
   }
 
   @ReactMethod
@@ -104,7 +109,15 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void serverStreamingCall(int id, String path, ReadableMap obj, ReadableMap headers, final Promise promise) {
-    ClientCall call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.SERVER_STREAMING, headers);
+    ClientCall call;
+
+    try {
+      call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.SERVER_STREAMING, headers);
+    } catch (Exception e) {
+      promise.reject(e);
+
+      return;
+    }
 
     byte[] data = Base64.decode(obj.getString("data"), Base64.NO_WRAP);
 
@@ -122,7 +135,13 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     ClientCall call = callsMap.get(id);
 
     if (call == null) {
-      call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.CLIENT_STREAMING, headers);
+      try {
+        call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.CLIENT_STREAMING, headers);
+      } catch (Exception e) {
+        promise.reject(e);
+
+        return;
+      }
 
       callsMap.put(id, call);
     }
@@ -160,7 +179,11 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     }
   }
 
-  private ClientCall startGrpcCall(int id, String path, MethodDescriptor.MethodType methodType, ReadableMap headers) {
+  private ClientCall startGrpcCall(int id, String path, MethodDescriptor.MethodType methodType, ReadableMap headers) throws Exception {
+    if (this.managedChannel == null) {
+      throw new Exception("Channel not created");
+    }
+
     path = normalizePath(path);
 
     final Metadata headersMetadata = new Metadata();
@@ -184,7 +207,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
       callOptions = callOptions.withCompression(this.compressorName);
     }
 
-    ClientCall call = this.getManagedChannel().newCall(descriptor, callOptions);
+    ClientCall call = this.managedChannel.newCall(descriptor, callOptions);
 
     call.start(new ClientCall.Listener() {
       @Override
@@ -298,9 +321,15 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     return path;
   }
 
-  private ManagedChannel getManagedChannel() {
-    if (managedChannel != null) return managedChannel;
+  private void handleOptionsChanged() {
+    if (this.managedChannel != null) {
+      this.managedChannel.shutdown();
+    }
 
+    this.managedChannel = createManagedChannel();
+  }
+
+  private ManagedChannel createManagedChannel() {
     ManagedChannelBuilder channelBuilder = ManagedChannelBuilder.forTarget(this.host);
 
     if (this.responseSizeLimit != null) {

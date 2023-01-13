@@ -85,6 +85,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     this.handleOptionsChanged();
   }
 
+  @ReactMethod
   public void setKeepalive(boolean enabled, int time, int timeout) {
     this.keepAliveEnabled = enabled;
     this.keepAliveTime = time;
@@ -94,7 +95,15 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void unaryCall(int id, String path, ReadableMap obj, ReadableMap headers, final Promise promise) {
-    ClientCall call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.UNARY, headers);
+    ClientCall call;
+
+    try {
+      call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.UNARY, headers);
+    } catch (Exception e) {
+      promise.reject(e);
+
+      return;
+    }
 
     byte[] data = Base64.decode(obj.getString("data"), Base64.NO_WRAP);
 

@@ -229,7 +229,7 @@ class RNGrpc: RCTEventEmitter {
                     "id": callId,
                     "type": "error",
                     "code": status?.code.rawValue ?? -1,
-                    "error": status?.message! ?? "",
+                    "error": status?.message ?? status?.description ?? "",
                     "trailers": NSDictionary(dictionary: trailers)
                 ]
 

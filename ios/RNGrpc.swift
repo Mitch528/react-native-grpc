@@ -14,7 +14,7 @@ typealias GrpcCall = any ClientCall
 
 @objc(Grpc)
 class RNGrpc: RCTEventEmitter {
-    private let group: EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+    private let group = PlatformSupport.makeEventLoopGroup(loopCount: System.coreCount)
 
     var grpcInsecure = false
     var grpcHost: String?
@@ -362,7 +362,7 @@ class RNGrpc: RCTEventEmitter {
 
         var config = GRPCChannelPool.Configuration.with(
                 target: .hostAndPort(host, port),
-                transportSecurity: self.grpcInsecure ? .plaintext : .tls(.makeClientConfigurationBackedByNIOSSL()),
+                transportSecurity: self.grpcInsecure ? .plaintext : .tls(.makeClientDefault(compatibleWith: self.group)),
                 eventLoopGroup: self.group
         )
 

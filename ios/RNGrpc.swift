@@ -22,6 +22,9 @@ class RNGrpc: RCTEventEmitter {
     var grpcCompression: Bool?
     var grpcCompressorName: String?
     var grpcCompressionLimit: Int?
+    var grpcKeepaliveEnabled: Bool?
+    var grpcKeepaliveTime: Int64?
+    var grpcKeepaliveTimeout: Int64?
     var calls = [Int: GrpcCall]()
 
     deinit {
@@ -44,6 +47,12 @@ class RNGrpc: RCTEventEmitter {
         self.grpcCompression = enabled.boolValue
         self.grpcCompressorName = compressorName
         self.grpcCompressionLimit = Int(limit ?? "")
+
+    @objc
+    public func setKeepalive(_ enabled: NSNumber, time: NSNumber, timeout: NSNumber) {
+        self.grpcKeepaliveEnabled = enabled.boolValue
+        self.grpcKeepaliveTime = time.int64Value
+        self.grpcKeepaliveTimeout = timeout.int64Value
     }
 
     @objc
@@ -359,6 +368,20 @@ class RNGrpc: RCTEventEmitter {
 
         if let maxReceiveSize = self.grpcResponseSizeLimit {
             config.maximumReceiveMessageLength = maxReceiveSize
+        }
+
+        if let enabled = grpcKeepaliveEnabled, enabled {
+            let interval = self.grpcKeepaliveTime != nil ? TimeAmount.seconds(self.grpcKeepaliveTime!) : TimeAmount.nanoseconds(.max)
+
+            let timeout = TimeAmount.seconds(grpcKeepaliveTimeout ?? 20)
+
+            let keepalive = ClientConnectionKeepalive(
+                    interval: interval,
+                    timeout: timeout,
+                    permitWithoutCalls: true
+            )
+
+            config.keepalive = keepalive
         }
 
         return try? GRPCChannelPool.with(configuration: config)

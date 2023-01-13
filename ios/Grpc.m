@@ -17,6 +17,12 @@ RCT_EXTERN_METHOD(setCompression:
         compressorName: (NSString *) compressorName
         limit: (NSString *) limit)
 
+RCT_EXTERN_METHOD(setKeepalive:
+(nonnull NSNumber *) enabled
+        time: (nonnull NSNumber *) time
+        timeout: (nonnull NSNumber *) timeout
+)
+
 RCT_EXTERN_METHOD(getIsInsecure:
     (RCTPromiseResolveBlock) resolve reject:
     (RCTPromiseRejectBlock) reject)

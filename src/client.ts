@@ -19,6 +19,7 @@ type GrpcType = {
   setHost(host: string): void;
   setInsecure(insecure: boolean): void;
   setCompression(enable: boolean, compressorName: string, limit?: string): void;
+  setKeepalive(enabled: boolean, time: number, timeout: number): void;
   setResponseSizeLimit(limitInBytes: number): void;
   unaryCall(
     id: number,
@@ -180,6 +181,9 @@ export class GrpcClient {
     limit?: number
   ): void {
     Grpc.setCompression(enable, compressorName, limit?.toString());
+  }
+  setKeepalive(enabled: boolean, time: number, timeout: number): void {
+    Grpc.setKeepalive(enabled, time, timeout);
   }
   setResponseSizeLimit(limitInBytes: number): void {
     Grpc.setResponseSizeLimit(limitInBytes);

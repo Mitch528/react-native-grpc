@@ -15,6 +15,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
@@ -33,6 +34,10 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   private boolean withCompression = false;
   private String compressorName = "";
   private Integer responseSizeLimit = null;
+  private boolean keepAliveEnabled = false;
+  private Integer keepAliveTime;
+  private Integer keepAliveTimeout;
+
   private ManagedChannel managedChannel = null;
 
   public GrpcModule(ReactApplicationContext context) {
@@ -74,6 +79,12 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void setResponseSizeLimit(int limit) {
     this.responseSizeLimit = limit;
+  }
+
+  public void setKeepalive(boolean enabled, int time, int timeout) {
+    this.keepAliveEnabled = enabled;
+    this.keepAliveTime = time;
+    this.keepAliveTimeout = timeout;
   }
 
   @ReactMethod
@@ -298,6 +309,13 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
     if (this.isInsecure) {
       channelBuilder = channelBuilder.usePlaintext();
+    }
+
+    if (this.keepAliveEnabled) {
+      channelBuilder = channelBuilder
+        .keepAliveWithoutCalls(true)
+        .keepAliveTime(keepAliveTime, TimeUnit.SECONDS)
+        .keepAliveTimeout(keepAliveTime, TimeUnit.SECONDS);
     }
 
     managedChannel = channelBuilder.build();

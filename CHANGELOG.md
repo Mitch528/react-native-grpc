@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+Add option to configure keepalive
+
+### Improvements
+
+Reuse connection pool on iOS
+Use optimal event loop group on iOS dependent on platform support
+
+### Bugfixes
+
+Fix channel on Android not reflecting updated options on change
+
 ## [1.0.0-5] - 2023-01-12
 
 ### Added

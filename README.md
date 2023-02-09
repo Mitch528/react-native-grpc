@@ -5,13 +5,13 @@ gRPC for react-native
 ## Installation
 
 ```sh
-npm install @mitch528/react-native-grpc
+npm install @krishnafkh/react-native-grpc
 ```
 
 ## Usage
 
 ```ts
-import { GrpcClient, GrpcMetadata } from '@mitch528/react-native-grpc';
+import { GrpcClient, GrpcMetadata } from '@krishnafkh/react-native-grpc';
 
 GrpcClient.setHost('example.com');
 

@@ -1,6 +1,6 @@
 import { AbortController, AbortSignal } from 'abort-controller';
 import { fromByteArray, toByteArray } from 'base64-js';
-import { NativeEventEmitter, NativeModules } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import { GrpcError } from './errors';
 import {
   GrpcServerStreamingCall,
@@ -175,11 +175,21 @@ export class GrpcClient {
   setInsecure(insecure: boolean): void {
     Grpc.setInsecure(insecure);
   }
+
+  /**
+   * setCompression - only for Android.
+   * @param enable
+   * @param compressorName
+   * @param limit
+   */
   setCompression(
     enable: boolean,
     compressorName: string,
     limit?: number
   ): void {
+    if (Platform.OS !== 'android') {
+      return;
+    }
     Grpc.setCompression(enable, compressorName, limit?.toString());
   }
   setKeepalive(enabled: boolean, time: number, timeout: number): void {

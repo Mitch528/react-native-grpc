@@ -24,7 +24,7 @@ if (process.cwd() !== root || args.length) {
 
 const scriptsDest = path.join(
   root,
-  'example/node_modules/@mitch528/react-native-grpc/scripts'
+  'example/node_modules/@krishnafkh/react-native-grpc/scripts'
 );
 
 if (!fs.existsSync(path.dirname(scriptsDest))) {

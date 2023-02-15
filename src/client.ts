@@ -76,6 +76,7 @@ const { Grpc } = NativeModules as { Grpc: GrpcType };
 const Emitter = new NativeEventEmitter(NativeModules.Grpc);
 
 type Deferred<T> = {
+  completed: boolean;
   promise: Promise<T>;
   resolve: (value: T) => void;
   reject: (reason: any) => void;
@@ -93,25 +94,23 @@ type DeferredCallMap = {
 };
 
 function createDeferred<T>(signal: AbortSignal) {
-  let completed = false;
-
-  const deferred: Deferred<T> = {} as any;
+  const deferred: Deferred<T> = { completed: false } as Deferred<T>;
 
   deferred.promise = new Promise<T>((resolve, reject) => {
     deferred.resolve = (value) => {
-      completed = true;
+      deferred.completed = true;
 
       resolve(value);
     };
     deferred.reject = (reason) => {
-      completed = true;
+      deferred.completed = true;
 
       reject(reason);
     };
   });
 
   signal.addEventListener('abort', () => {
-    if (!completed) {
+    if (!deferred.completed) {
       deferred.reject('aborted');
     }
   });
@@ -227,11 +226,6 @@ export class GrpcClient {
       abort
     );
 
-    call.then(
-      (result) => result,
-      () => abort.abort()
-    );
-
     return call;
   }
   serverStreamCall(
@@ -272,11 +266,6 @@ export class GrpcClient {
       stream,
       trailers.promise,
       abort
-    );
-
-    call.then(
-      (result) => result,
-      () => abort.abort()
     );
 
     return call;

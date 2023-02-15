@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Bugfixes
+
+Don't abort the request prematurely when an error occurs
+
 ## [1.0.0-6] - 2023-01-13
 
 ### Added

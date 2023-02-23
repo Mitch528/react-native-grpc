@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.0-8] - 2023-02-23
 
 ### Bugfixes
 

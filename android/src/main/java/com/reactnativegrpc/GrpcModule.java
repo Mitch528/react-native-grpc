@@ -270,10 +270,11 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
         callsMap.remove(id);
 
-        WritableMap event = Arguments.createMap();
-        event.putInt("id", id);
-
+        WritableMap trailersEvent = Arguments.createMap();
         WritableMap trailersMap = Arguments.createMap();
+
+        trailersEvent.putInt("id", id);
+        trailersEvent.putString("type", "trailers");
 
         for (String key : trailers.keys()) {
           if (key.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
@@ -288,16 +289,20 @@ public class GrpcModule extends ReactContextBaseJavaModule {
         }
 
         if (!status.isOk()) {
-          event.putString("type", "error");
-          event.putString("error", status.asException(trailers).getLocalizedMessage());
-          event.putInt("code", status.getCode().value());
-          event.putMap("trailers", trailersMap);
-        } else {
-          event.putString("type", "trailers");
-          event.putMap("payload", trailersMap);
+          WritableMap errorEvent = Arguments.createMap();
+
+          errorEvent.putInt("id", id);
+          errorEvent.putString("type", "error");
+          errorEvent.putString("error", status.asException(trailers).getLocalizedMessage());
+          errorEvent.putInt("code", status.getCode().value());
+          errorEvent.putMap("trailers", trailersMap.copy());
+
+          emitEvent("grpc-call", errorEvent);
         }
 
-        emitEvent("grpc-call", event);
+        trailersEvent.putMap("payload", trailersMap);
+
+        emitEvent("grpc-call", trailersEvent);
       }
     }, headersMetadata);
 

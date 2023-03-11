@@ -176,6 +176,12 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
     CallOptions callOptions = CallOptions.DEFAULT;
 
+    if (settings.hasKey("requestTimeout")) {
+      int callTimeout = settings.getInt("requestTimeout");
+
+      callOptions = callOptions.withDeadlineAfter(callTimeout, TimeUnit.MILLISECONDS);
+    }
+
     if (settings.hasKey("compressionName")) {
       callOptions = callOptions.withCompression(settings.getString("compressionName"));
     }

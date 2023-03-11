@@ -311,9 +311,14 @@ class RNGrpc: RCTEventEmitter {
 
     private func getCallOptionsWithHeaders(id: Int, headers: HPACKHeaders) throws -> CallOptions {
         var encoding: ClientMessageEncoding = .disabled
+        var timeLimit: TimeLimit = .none
 
         guard let (options, _) = self.connections[id] else {
             throw GrpcError.missingConnection
+        }
+
+        if let callTimeout = options["requestTimeout"] as? Int64 {
+            timeLimit = .timeout(.seconds(callTimeout))
         }
 
         if let enabled = options["compression"] as? NSNumber, enabled.boolValue {
@@ -343,7 +348,7 @@ class RNGrpc: RCTEventEmitter {
             )
         }
 
-        return CallOptions(customMetadata: headers, messageEncoding: encoding)
+        return CallOptions(customMetadata: headers, timeLimit: timeLimit, messageEncoding: encoding)
     }
 
     private func closeConnection(id: Int) throws {

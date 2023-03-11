@@ -12,6 +12,7 @@ export type GrpcClientSettings = {
   keepalive?: boolean;
   keepaliveInterval?: number;
   keepaliveTimeout?: number;
+  requestTimeout?: number;
 };
 
 export interface GrpcServerInputStream {

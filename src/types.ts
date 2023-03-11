@@ -2,6 +2,18 @@ export type GrpcMetadata = Record<string, string>;
 
 export type RemoveListener = () => void;
 
+export type GrpcClientSettings = {
+  host: string;
+  insecure?: boolean;
+  compression?: boolean;
+  compressionName?: string;
+  compressionLimit?: number;
+  responseLimit?: number;
+  keepalive?: boolean;
+  keepaliveInterval?: number;
+  keepaliveTimeout?: number;
+};
+
 export interface GrpcServerInputStream {
   send(data: Uint8Array): Promise<void>;
   complete(): Promise<void>;

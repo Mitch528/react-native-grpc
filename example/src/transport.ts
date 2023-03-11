@@ -1,5 +1,16 @@
 /* eslint-disable eslint-comments/no-unlimited-disable */
-import { ClientStreamingCall, DuplexStreamingCall, mergeRpcOptions, MethodInfo, RpcOptions, RpcOutputStreamController, RpcStatus, RpcTransport, ServerStreamingCall, UnaryCall } from '@protobuf-ts/runtime-rpc';
+import {
+  ClientStreamingCall,
+  DuplexStreamingCall,
+  mergeRpcOptions,
+  MethodInfo,
+  RpcOptions,
+  RpcOutputStreamController,
+  RpcStatus,
+  RpcTransport,
+  ServerStreamingCall,
+  UnaryCall,
+} from '@protobuf-ts/runtime-rpc';
 import { GrpcClient, GrpcMetadata } from '@mitch528/react-native-grpc';
 import { AbortSignal } from 'abort-controller';
 
@@ -10,6 +21,9 @@ function makePath(method: MethodInfo): string {
 }
 
 export class RNGrpcTransport implements RpcTransport {
+  constructor(private client: GrpcClient) {
+  }
+
   mergeOptions(options?: Partial<RpcOptions>): RpcOptions {
     return mergeRpcOptions({}, options);
   }
@@ -18,7 +32,7 @@ export class RNGrpcTransport implements RpcTransport {
     const data = method.I.toBinary(input, options.binaryOptions);
     const grpcMethod = makePath(method);
 
-    const call = GrpcClient.unaryCall(
+    const call = this.client.unaryCall(
       grpcMethod,
       data,
       headers as GrpcMetadata
@@ -48,7 +62,7 @@ export class RNGrpcTransport implements RpcTransport {
     const data = method.I.toBinary(input, options.binaryOptions);
     const grpcMethod = makePath(method);
 
-    const call = GrpcClient.serverStreamCall(grpcMethod, data, headers as GrpcMetadata);
+    const call = this.client.serverStreamCall(grpcMethod, data, headers as GrpcMetadata);
     const status = call.trailers.then<RpcStatus, RpcStatus>(() => ({
       code: 0,
       detail: '',
@@ -59,7 +73,7 @@ export class RNGrpcTransport implements RpcTransport {
 
     const outStream = new RpcOutputStreamController<O>();
 
-    call.responses.on('data', (data) => {
+    call.responses.on('data', (data: Uint8Array) => {
       outStream.notifyMessage(method.O.fromBinary(data));
     });
 
@@ -69,7 +83,7 @@ export class RNGrpcTransport implements RpcTransport {
       }
     });
 
-    call.responses.on('error', (reason) => {
+    call.responses.on('error', (reason: Error) => {
       outStream.notifyError(reason);
     });
 

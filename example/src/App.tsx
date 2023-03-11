@@ -10,10 +10,14 @@ export default function App() {
   const [result, setResult] = useState<string>();
 
   useEffect(() => {
-    GrpcClient.setHost('example.com');
-    GrpcClient.setInsecure(true);
+    const nativeClient = new GrpcClient({
+      host: 'localhost:5010',
+      insecure: true,
+      compression: true,
+      keepalive: true,
+    });
 
-    const client = new ExamplesClient(new RNGrpcTransport());
+    const client = new ExamplesClient(new RNGrpcTransport(nativeClient));
     const request = ExampleRequest.create({
       message: 'Hello World',
     });
@@ -24,17 +28,15 @@ export default function App() {
       abort: abort.signal,
     });
 
-    // unaryCall.then(result => console.log(result));
-
     unaryCall.response.then((response) => setResult(response.message));
 
-    // const stream = client.getExampleMessages(message, {
-    //   abort: abort.signal,
-    // });
+    const stream = client.getExampleMessages(request, {
+      abort: abort.signal,
+    });
 
-    // // stream.response.onMessage(msg => console.log(msg.message))
-    // // stream.response.onComplete(() => console.log('Completed!'));
-    // // stream.response.onError(err => console.log(err))
+    stream.responses.onMessage((msg) => console.log(msg.message));
+    stream.responses.onComplete(() => console.log('Completed!'));
+    stream.responses.onError((err) => console.log(err));
   }, []);
 
   return (

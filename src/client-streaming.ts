@@ -1,12 +1,12 @@
 import { fromByteArray } from 'base64-js';
 import { Grpc } from './client';
-import { GrpcServerInputStream } from './types';
+import type { GrpcServerInputStream } from './types';
 
 export class ServerInputStream implements GrpcServerInputStream {
   // eslint-disable-next-line prettier/prettier
-  constructor(private callId: number, private method: string) { }
+  constructor(private callId: number, private clientId: number, private method: string) { }
   send(data: Uint8Array): Promise<void> {
-    return Grpc.clientStreamingCall(this.callId, this.method, {
+    return Grpc.clientStreamingCall(this.callId, this.clientId, this.method, {
       data: fromByteArray(data),
     });
   }

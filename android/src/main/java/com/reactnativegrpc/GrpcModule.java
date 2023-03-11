@@ -15,6 +15,8 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import io.grpc.CallOptions;
@@ -28,17 +30,8 @@ import io.grpc.Status;
 public class GrpcModule extends ReactContextBaseJavaModule {
   private final ReactApplicationContext context;
   private final HashMap<Integer, ClientCall> callsMap = new HashMap<>();
-
-  private String host;
-  private boolean isInsecure = false;
-  private boolean withCompression = false;
-  private String compressorName = "";
-  private Integer responseSizeLimit = null;
-  private boolean keepAliveEnabled = false;
-  private Integer keepAliveTime;
-  private Integer keepAliveTimeout;
-
-  private ManagedChannel managedChannel = null;
+  private final HashMap<Integer, GrpcConnection> connections = new HashMap<>();
+  private final Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   public GrpcModule(ReactApplicationContext context) {
     this.context = context;
@@ -50,55 +43,22 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     return "Grpc";
   }
 
-  @ReactMethod()
-  public void getHost(final Promise promise) {
-    promise.resolve(this.host);
-  }
 
-  @ReactMethod()
-  public void getIsInsecure(final Promise promise) {
-    promise.resolve(this.isInsecure);
+  @ReactMethod
+  public void setGrpcSettings(int id, ReadableMap settings) {
+    this.destroyClient(id);
+
+    ManagedChannel channel = this.createManagedChannel(id, settings);
+
+    this.connections.put(id, new GrpcConnection(channel, settings));
   }
 
   @ReactMethod
-  public void setHost(String host) {
-    this.host = host;
-    this.handleOptionsChanged();
-  }
-
-  @ReactMethod
-  public void setInsecure(boolean insecure) {
-    this.isInsecure = insecure;
-    this.handleOptionsChanged();
-  }
-
-  @ReactMethod
-  public void setCompression(Boolean enable, String compressorName, String limit) {
-    this.withCompression = enable;
-    this.compressorName = compressorName;
-    this.handleOptionsChanged();
-  }
-
-  @ReactMethod
-  public void setResponseSizeLimit(int limit) {
-    this.responseSizeLimit = limit;
-    this.handleOptionsChanged();
-  }
-
-  @ReactMethod
-  public void setKeepalive(boolean enabled, int time, int timeout) {
-    this.keepAliveEnabled = enabled;
-    this.keepAliveTime = time;
-    this.keepAliveTimeout = timeout;
-    this.handleOptionsChanged();
-  }
-
-  @ReactMethod
-  public void unaryCall(int id, String path, ReadableMap obj, ReadableMap headers, final Promise promise) {
+  public void unaryCall(int callId, Integer id, String path, ReadableMap obj, ReadableMap headers, final Promise promise) {
     ClientCall call;
 
     try {
-      call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.UNARY, headers);
+      call = this.startGrpcCall(callId, id, path, MethodDescriptor.MethodType.UNARY, headers);
     } catch (Exception e) {
       promise.reject(e);
 
@@ -117,11 +77,11 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void serverStreamingCall(int id, String path, ReadableMap obj, ReadableMap headers, final Promise promise) {
+  public void serverStreamingCall(int id, int clientId, String path, ReadableMap obj, ReadableMap headers, final Promise promise) {
     ClientCall call;
 
     try {
-      call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.SERVER_STREAMING, headers);
+      call = this.startGrpcCall(id, clientId, path, MethodDescriptor.MethodType.SERVER_STREAMING, headers);
     } catch (Exception e) {
       promise.reject(e);
 
@@ -140,12 +100,12 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void clientStreamingCall(int id, String path, ReadableMap obj, ReadableMap headers, final Promise promise) {
+  public void clientStreamingCall(int id, int clientId, String path, ReadableMap obj, ReadableMap headers, final Promise promise) {
     ClientCall call = callsMap.get(id);
 
     if (call == null) {
       try {
-        call = this.startGrpcCall(id, path, MethodDescriptor.MethodType.CLIENT_STREAMING, headers);
+        call = this.startGrpcCall(id, clientId, path, MethodDescriptor.MethodType.CLIENT_STREAMING, headers);
       } catch (Exception e) {
         promise.reject(e);
 
@@ -188,10 +148,14 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     }
   }
 
-  private ClientCall startGrpcCall(int id, String path, MethodDescriptor.MethodType methodType, ReadableMap headers) throws Exception {
-    if (this.managedChannel == null) {
+  private ClientCall startGrpcCall(int callId, int clientId, String path, MethodDescriptor.MethodType methodType, ReadableMap headers) throws Exception {
+    if (!this.connections.containsKey(clientId)) {
       throw new Exception("Channel not created");
     }
+
+    GrpcConnection connection = this.connections.get(clientId);
+    ReadableMap settings = connection.getSettings();
+    ManagedChannel channel = connection.getChannel();
 
     path = normalizePath(path);
 
@@ -212,11 +176,11 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
     CallOptions callOptions = CallOptions.DEFAULT;
 
-    if (!this.compressorName.isEmpty()) {
-      callOptions = callOptions.withCompression(this.compressorName);
+    if (settings.hasKey("compressionName")) {
+      callOptions = callOptions.withCompression(settings.getString("compressionName"));
     }
 
-    ClientCall call = this.managedChannel.newCall(descriptor, callOptions);
+    ClientCall call = channel.newCall(descriptor, callOptions);
 
     call.start(new ClientCall.Listener() {
       @Override
@@ -238,7 +202,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
           }
         }
 
-        event.putInt("id", id);
+        event.putInt("id", callId);
         event.putString("type", "headers");
         event.putMap("payload", payload);
 
@@ -253,7 +217,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
         WritableMap event = Arguments.createMap();
 
-        event.putInt("id", id);
+        event.putInt("id", callId);
         event.putString("type", "response");
         event.putString("payload", Base64.encodeToString(data, Base64.NO_WRAP));
 
@@ -268,12 +232,12 @@ public class GrpcModule extends ReactContextBaseJavaModule {
       public void onClose(Status status, Metadata trailers) {
         super.onClose(status, trailers);
 
-        callsMap.remove(id);
+        callsMap.remove(callId);
 
         WritableMap trailersEvent = Arguments.createMap();
         WritableMap trailersMap = Arguments.createMap();
 
-        trailersEvent.putInt("id", id);
+        trailersEvent.putInt("id", callId);
         trailersEvent.putString("type", "trailers");
 
         for (String key : trailers.keys()) {
@@ -291,7 +255,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
         if (!status.isOk()) {
           WritableMap errorEvent = Arguments.createMap();
 
-          errorEvent.putInt("id", id);
+          errorEvent.putInt("id", callId);
           errorEvent.putString("type", "error");
           errorEvent.putString("error", status.asException(trailers).getLocalizedMessage());
           errorEvent.putInt("code", status.getCode().value());
@@ -306,11 +270,22 @@ public class GrpcModule extends ReactContextBaseJavaModule {
       }
     }, headersMetadata);
 
-    if (this.withCompression) {
+    if (settings.hasKey("compression") && settings.getBoolean("compression")) {
       call.setMessageCompression(true);
     }
 
     return call;
+  }
+
+  @ReactMethod
+  public void destroyClient(int id) {
+    if (this.connections.containsKey(id)) {
+      GrpcConnection connection = this.connections.get(id);
+
+      connection.getChannel().shutdown();
+
+      this.connections.remove(id);
+    }
   }
 
   @ReactMethod
@@ -322,9 +297,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   }
 
   private void emitEvent(String eventName, Object params) {
-    context
-      .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-      .emit(eventName, params);
+    context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
   }
 
   private static String normalizePath(String path) {
@@ -335,33 +308,49 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     return path;
   }
 
-  private void handleOptionsChanged() {
-    if (this.managedChannel != null) {
-      this.managedChannel.shutdown();
+  private ManagedChannel createManagedChannel(int id, ReadableMap options) {
+    if (!options.hasKey("host")) {
+      throw new IllegalArgumentException("host is required");
     }
 
-    this.managedChannel = createManagedChannel();
-  }
+    String host = options.getString("host");
 
-  private ManagedChannel createManagedChannel() {
-    ManagedChannelBuilder channelBuilder = ManagedChannelBuilder.forTarget(this.host);
+    ManagedChannelBuilder channelBuilder = ManagedChannelBuilder.forTarget(host).executor(executor);
 
-    if (this.responseSizeLimit != null) {
-      channelBuilder = channelBuilder.maxInboundMessageSize(this.responseSizeLimit);
-    }
-
-    if (this.isInsecure) {
+    if (options.hasKey("insecure") && options.getBoolean("insecure")) {
       channelBuilder = channelBuilder.usePlaintext();
     }
 
-    if (this.keepAliveEnabled) {
-      channelBuilder = channelBuilder
-        .keepAliveWithoutCalls(true)
-        .keepAliveTime(keepAliveTime, TimeUnit.SECONDS)
-        .keepAliveTimeout(keepAliveTime, TimeUnit.SECONDS);
+    if (options.hasKey("responseSizeLimit")) {
+      int responseSizeLimit = options.getInt("responseSizeLimit");
+
+      channelBuilder = channelBuilder.maxInboundMessageSize(responseSizeLimit);
     }
 
-    managedChannel = channelBuilder.build();
-    return managedChannel;
+    boolean keepalive = true;
+
+    if (options.hasKey("keepalive")) {
+      keepalive = options.getBoolean("keepalive");
+    }
+
+    if (keepalive) {
+      int keepAliveTimeout = 20;
+      long keepaliveInterval = Long.MAX_VALUE;
+
+      if (options.hasKey("keepaliveInterval")) {
+        keepaliveInterval = options.getInt("keepaliveInterval");
+      }
+
+      if (options.hasKey("keepaliveTimeout")) {
+        keepAliveTimeout = options.getInt("keepaliveTimeout");
+      }
+
+      channelBuilder = channelBuilder
+        .keepAliveWithoutCalls(true)
+        .keepAliveTime(keepaliveInterval, TimeUnit.SECONDS)
+        .keepAliveTimeout(keepAliveTimeout, TimeUnit.SECONDS);
+    }
+
+    return channelBuilder.build();
   }
 }

@@ -1,41 +1,45 @@
 import { AbortController, AbortSignal } from 'abort-controller';
 import { fromByteArray, toByteArray } from 'base64-js';
-import { NativeEventEmitter, NativeModules } from 'react-native';
+import {
+  EmitterSubscription,
+  NativeEventEmitter,
+  NativeModules,
+} from 'react-native';
 import { GrpcError } from './errors';
 import {
   GrpcServerStreamingCall,
   ServerOutputStream,
 } from './server-streaming';
-import { GrpcMetadata } from './types';
+import type { GrpcClientSettings, GrpcMetadata } from './types';
 import { GrpcUnaryCall } from './unary';
 
 type GrpcRequestObject = {
   data: string;
 };
 
+type GrpcOptions = GrpcClientSettings;
+
 type GrpcType = {
-  getHost: () => Promise<string>;
-  getIsInsecure: () => Promise<boolean>;
-  setHost(host: string): void;
-  setInsecure(insecure: boolean): void;
-  setCompression(enable: boolean, compressorName: string, limit?: string): void;
-  setKeepalive(enabled: boolean, time: number, timeout: number): void;
-  setResponseSizeLimit(limitInBytes: number): void;
+  setGrpcSettings(id: number, settings: GrpcOptions): void;
+  destroyClient(id: number): void;
   unaryCall(
-    id: number,
+    callId: number,
+    clientId: number,
     path: string,
     obj: GrpcRequestObject,
     requestHeaders?: GrpcMetadata
   ): Promise<void>;
   serverStreamingCall(
-    id: number,
+    callId: number,
+    clientId: number,
     path: string,
     obj: GrpcRequestObject,
     requestHeaders?: GrpcMetadata
   ): Promise<void>;
   cancelGrpcCall: (id: number) => Promise<boolean>;
   clientStreamingCall(
-    id: number,
+    callId: number,
+    clientId: number,
     path: string,
     obj: GrpcRequestObject,
     requestHeaders?: GrpcMetadata
@@ -89,9 +93,7 @@ type DeferredCalls = {
   data?: ServerOutputStream;
 };
 
-type DeferredCallMap = {
-  [id: number]: DeferredCalls;
-};
+type DeferredCallMap = Map<number, DeferredCalls>;
 
 function createDeferred<T>(signal: AbortSignal) {
   const deferred: Deferred<T> = { completed: false } as Deferred<T>;
@@ -120,72 +122,64 @@ function createDeferred<T>(signal: AbortSignal) {
 
 let idCtr = 1;
 
-const deferredMap: DeferredCallMap = {};
-
-function handleGrpcEvent(event: GrpcEvent) {
-  const deferred = deferredMap[event.id];
-
-  if (deferred) {
-    switch (event.type) {
-      case 'headers':
-        deferred.headers?.resolve(event.payload);
-        break;
-      case 'response':
-        const data = toByteArray(event.payload);
-
-        deferred.data?.notifyData(data);
-        deferred.response?.resolve(data);
-        break;
-      case 'trailers':
-        deferred.trailers?.resolve(event.payload);
-        deferred.data?.notifyComplete();
-        break;
-      case 'error':
-        const error = new GrpcError(event.error, event.code, event.trailers);
-
-        deferred.response?.reject(error);
-        deferred.data?.noitfyError(error);
-
-        break;
-    }
-  }
-}
-
 function getId(): number {
   return idCtr++;
 }
 
 export class GrpcClient {
-  constructor() {
-    Emitter.addListener('grpc-call', handleGrpcEvent);
+  #deferredMap: DeferredCallMap = new Map<number, DeferredCalls>();
+
+  #handleGrpcEvent = (event: GrpcEvent) => {
+    const deferred = this.#deferredMap.get(event.id);
+
+    if (deferred) {
+      switch (event.type) {
+        case 'headers':
+          deferred.headers?.resolve(event.payload);
+          break;
+        case 'response':
+          const data = toByteArray(event.payload);
+
+          deferred.data?.notifyData(data);
+          deferred.response?.resolve(data);
+          break;
+        case 'trailers':
+          deferred.trailers?.resolve(event.payload);
+          deferred.data?.notifyComplete();
+
+          this.#deferredMap.delete(event.id);
+          break;
+        case 'error':
+          const error = new GrpcError(event.error, event.code, event.trailers);
+
+          deferred.response?.reject(error);
+          deferred.data?.noitfyError(error);
+
+          break;
+      }
+    }
+  };
+
+  public clientId: number;
+
+  private callSubscription: EmitterSubscription;
+
+  constructor(settings: GrpcClientSettings) {
+    this.clientId = getId();
+    this.updateSettings(settings);
+
+    this.callSubscription = Emitter.addListener(
+      'grpc-call',
+      this.#handleGrpcEvent
+    );
   }
   destroy() {
-    Emitter.removeAllListeners('grpc-call');
+    Emitter.removeSubscription(this.callSubscription);
+
+    Grpc.destroyClient(this.clientId);
   }
-  getHost(): Promise<string> {
-    return Grpc.getHost();
-  }
-  setHost(host: string): void {
-    Grpc.setHost(host);
-  }
-  getInsecure(): Promise<boolean> {
-    return Grpc.getIsInsecure();
-  }
-  setInsecure(insecure: boolean): void {
-    Grpc.setInsecure(insecure);
-  }
-  setCompression(
-    enable: boolean,
-    compressorName: string,
-    limit?: number
-  ): void {
-    Grpc.setCompression(enable, compressorName, limit?.toString());
-  }
-  setKeepalive(enabled: boolean, time: number, timeout: number): void {
-    Grpc.setKeepalive(enabled, time, timeout);
-  }
-  setResponseSizeLimit(limitInBytes: number): void {
-    Grpc.setResponseSizeLimit(limitInBytes);
+  updateSettings(settings: GrpcClientSettings) {
+    Grpc.setGrpcSettings(this.clientId, settings);
   }
   unaryCall(
     method: string,
@@ -208,13 +202,13 @@ export class GrpcClient {
     const headers = createDeferred<GrpcMetadata>(abort.signal);
     const trailers = createDeferred<GrpcMetadata>(abort.signal);
 
-    deferredMap[id] = {
+    this.#deferredMap.set(id, {
       response,
       headers,
       trailers,
-    };
+    });
 
-    Grpc.unaryCall(id, method, obj, requestHeaders || {});
+    Grpc.unaryCall(id, this.clientId, method, obj, requestHeaders || {});
 
     const call = new GrpcUnaryCall(
       method,
@@ -250,13 +244,19 @@ export class GrpcClient {
 
     const stream = new ServerOutputStream();
 
-    deferredMap[id] = {
+    this.#deferredMap.set(id, {
       headers,
       trailers,
       data: stream,
-    };
+    });
 
-    Grpc.serverStreamingCall(id, method, obj, requestHeaders || {});
+    Grpc.serverStreamingCall(
+      id,
+      this.clientId,
+      method,
+      obj,
+      requestHeaders || {}
+    );
 
     const call = new GrpcServerStreamingCall(
       method,

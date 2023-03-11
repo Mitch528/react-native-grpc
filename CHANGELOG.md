@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+Add option to set request timeout
+
 ## [1.0.0-9] - 2023-03-11
 
 ### Breaking

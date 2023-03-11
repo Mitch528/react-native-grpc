@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Breaking
+
+You now need to create `GrpcClient` instances rather than calling static methods
+
+### Added
+
+Ability to create multiple `GrpcClient` instances with different hosts and settings
+
 ## [1.0.0-8] - 2023-02-23
 
 ### Bugfixes

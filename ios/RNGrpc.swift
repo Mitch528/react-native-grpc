@@ -207,13 +207,27 @@ class RNGrpc: RCTEventEmitter {
 
                 dispatchEvent(event: event)
             case .failure(let error):
-                let status = error as? GRPCStatus
+                var message = error.localizedDescription
+                var code = -1
+
+                var status: GRPCStatus?
+
+                if let statusTransform = error as? GRPCStatusTransformable {
+                    status = statusTransform.makeGRPCStatus()
+                } else if let grpcStatus = error as? GRPCStatus {
+                    status = grpcStatus
+                }
+
+                if let errorStatus = status {
+                    message = errorStatus.message?.description ?? message
+                    code = errorStatus.code.rawValue
+                }
 
                 let event: NSDictionary = [
                     "id": callId,
                     "type": "error",
-                    "code": status?.code.rawValue ?? -1,
-                    "error": status?.message ?? status?.description ?? "",
+                    "code": code,
+                    "error": message,
                     "trailers": NSDictionary(dictionary: trailers)
                 ]
 

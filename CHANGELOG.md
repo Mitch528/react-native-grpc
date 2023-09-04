@@ -6,6 +6,12 @@
 
 Add option to configure keepalive
 
+## [1.0.3] - 2023-04-12
+
+### Added
+
+Reverted swift dependency for ios pods
+
 ## [1.0.0-6] - 2023-01-13
 
 ### Added

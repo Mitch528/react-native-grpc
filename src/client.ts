@@ -1,6 +1,6 @@
 import { AbortController, AbortSignal } from 'abort-controller';
 import { fromByteArray, toByteArray } from 'base64-js';
-import {NativeEventEmitter, NativeModules, Platform} from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import { GrpcError } from './errors';
 import {
   GrpcServerStreamingCall,
@@ -14,7 +14,6 @@ type GrpcRequestObject = {
 };
 
 type GrpcType = {
-
   getHost: () => Promise<string>;
   getIsInsecure: () => Promise<boolean>;
   setHost(host: string): void;
@@ -42,11 +41,15 @@ type GrpcType = {
     requestHeaders?: GrpcMetadata
   ): Promise<void>;
   finishClientStreaming(id: number): Promise<void>;
-  resetConnection(message: string):void;
-  setKeepAlive(enable : boolean,keepAliveTime: number,keepAliveTimeOut: number):void;
-  onConnectionStateChange():void;
-  setUiLogEnabled(enable:boolean):void;
-  enterIdle():void;
+  resetConnection(message: string): void;
+  setKeepAlive(
+    enable: boolean,
+    keepAliveTime: number,
+    keepAliveTimeOut: number
+  ): void;
+  onConnectionStateChange(): void;
+  setUiLogEnabled(enable: boolean): void;
+  enterIdle(): void;
 };
 
 type GrpcEventType = 'response' | 'error' | 'headers' | 'trailers';
@@ -193,33 +196,36 @@ export class GrpcClient {
     Grpc.setResponseSizeLimit(limitInBytes);
   }
 
-  initGrpcChannel(){
+  initGrpcChannel() {
     Grpc.initGrpcChannel();
-  };
+  }
 
-  setKeepAlive(enable : boolean,keepAliveTime: number,keepAliveTimeOut: number): void {
-    Grpc.setKeepAlive(enable,keepAliveTime,keepAliveTimeOut);
+  setKeepAlive(
+    enable: boolean,
+    keepAliveTime: number,
+    keepAliveTimeOut: number
+  ): void {
+    Grpc.setKeepAlive(enable, keepAliveTime, keepAliveTimeOut);
   }
 
   resetConnection(message: string): void {
-    if(!this.isAndroid()) return;
+    if (!this.isAndroid()) return;
     Grpc.resetConnection(message);
   }
   setUiLogEnabled(enable: boolean): void {
-    if(!this.isAndroid()) return;
+    if (!this.isAndroid()) return;
     Grpc.setUiLogEnabled(enable);
   }
 
   onConnectionStateChange(): void {
-    if(!this.isAndroid()) return;
+    if (!this.isAndroid()) return;
     Grpc.onConnectionStateChange();
   }
 
   enterIdle(): void {
-    if(!this.isAndroid()) return;
+    if (!this.isAndroid()) return;
     Grpc.enterIdle();
   }
-
 
   unaryCall(
     method: string,
@@ -315,7 +321,7 @@ export class GrpcClient {
     return call;
   }
 
-  private isAndroid() : Boolean {
+  private isAndroid(): Boolean {
     return Platform.OS === 'android';
   }
 }

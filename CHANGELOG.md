@@ -1,6 +1,12 @@
-# Changelog
-
 ## [Unreleased] - 2023-09-04
+
+### Added
+1. Channel Creation happening from JS layer
+2. Reset Connection
+3. Reset Connection State based on current state
+4. UI log to debug release build
+
+## [1.0.5] - 2023-04-12
 
 ### Added
 

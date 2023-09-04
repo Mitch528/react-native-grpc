@@ -1,6 +1,6 @@
 {
   "name": "@krishnafkh/react-native-grpc",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "gRPC for react-native",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

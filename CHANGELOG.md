@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] - 2023-09-04
+
+### Added
+
+Add option to configure keepalive
+
 ## [1.0.0-6] - 2023-01-13
 
 ### Added

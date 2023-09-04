@@ -21,11 +21,11 @@ type GrpcType = {
   setCompression(enable: boolean, compressorName: string, limit?: string): void;
   setKeepalive(enabled: boolean, time: number, timeout: number): void;
   setResponseSizeLimit(limitInBytes: number): void;
-  resetConnection(message: string):void;
-  setKeepAliveTime(keepAliveTime: number):void;
-  onConnectionStateChange():void;
-  setUiLogEnabled(enable:boolean):void;
-  enterIdle():void;
+  resetConnection(message: string): void;
+  setKeepAliveTime(keepAliveTime: number): void;
+  onConnectionStateChange(): void;
+  setUiLogEnabled(enable: boolean): void;
+  enterIdle(): void;
   unaryCall(
     id: number,
     path: string,
@@ -340,12 +340,9 @@ export class GrpcClient {
     return call;
   }
 
-
-
   private isAndroid(): Boolean {
-    return Platform.OS == 'android';
+    return Platform.OS === 'android';
   }
-
 }
 
 export { Grpc };

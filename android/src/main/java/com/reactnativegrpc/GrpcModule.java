@@ -1,8 +1,12 @@
 package com.reactnativegrpc;
-
+import android.util.Log;
+import android.widget.Toast;
 import android.util.Base64;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -19,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
@@ -39,6 +44,8 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   private Integer keepAliveTimeout;
 
   private ManagedChannel managedChannel = null;
+
+  private boolean isUiLogEnabled = false;
 
   public GrpcModule(ReactApplicationContext context) {
     this.context = context;
@@ -332,9 +339,9 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
   private void handleOptionsChanged() {
     if (this.managedChannel != null) {
+      this.managedChannel.resetConnectBackoff();
       this.managedChannel.shutdown();
     }
-
     this.managedChannel = createManagedChannel();
   }
 
@@ -358,5 +365,57 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
     managedChannel = channelBuilder.build();
     return managedChannel;
+  }
+
+  @ReactMethod
+  public void resetConnection(final String message){
+    handleOptionsChanged();
+
+    showToast("resetConnection "+message);
+  }
+
+  @ReactMethod
+  public void onConnectionStateChange(){
+    if(null == managedChannel) return;
+
+    final ConnectivityState connectivityState = managedChannel.getState(true);
+    if(ConnectivityState.CONNECTING == connectivityState){
+      showToast("onConnectionState CONNECTING");
+    } else if(ConnectivityState.IDLE == connectivityState){
+      showToast("onConnectionState IDLE");
+    } else if(ConnectivityState.READY == connectivityState){
+      showToast("onConnectionState READY");
+    } else if(ConnectivityState.TRANSIENT_FAILURE == connectivityState){
+      showToast("onConnectionState TRANSIENT_FAILURE");
+    } else if(ConnectivityState.SHUTDOWN == connectivityState){
+      showToast("onConnectionState SHUTDOWN");
+    } else {
+      showToast("onConnectionState UNDEFINED");
+    }
+    if(ConnectivityState.TRANSIENT_FAILURE == connectivityState && managedChannel.isTerminated() || managedChannel.isShutdown()){
+      resetConnection("onConnectionStateChange");
+    }
+  }
+
+  @ReactMethod
+  public void enterIdle(){
+    if(null == managedChannel) return;
+
+    managedChannel.enterIdle();
+
+    showToast("enterIdle");
+  }
+
+  @ReactMethod
+  public void setUiLogEnabled(boolean isUiLogEnabled){
+    this.isUiLogEnabled = isUiLogEnabled;
+  }
+
+  @UiThread
+  private void showToast(final String message){
+    if(!isUiLogEnabled || null == context) return;
+
+    Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
+    Log.d("GRPC_MODULE",message);
   }
 }

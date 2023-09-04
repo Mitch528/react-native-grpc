@@ -21,6 +21,11 @@ type GrpcType = {
   setCompression(enable: boolean, compressorName: string, limit?: string): void;
   setKeepalive(enabled: boolean, time: number, timeout: number): void;
   setResponseSizeLimit(limitInBytes: number): void;
+  resetConnection(message: string):void;
+  setKeepAliveTime(keepAliveTime: number):void;
+  onConnectionStateChange():void;
+  setUiLogEnabled(enable:boolean):void;
+  enterIdle():void;
   unaryCall(
     id: number,
     path: string,
@@ -187,7 +192,7 @@ export class GrpcClient {
     compressorName: string,
     limit?: number
   ): void {
-    if (Platform.OS !== 'android') {
+    if (!this.isAndroid()) {
       return;
     }
     Grpc.setCompression(enable, compressorName, limit?.toString());
@@ -198,6 +203,49 @@ export class GrpcClient {
   setResponseSizeLimit(limitInBytes: number): void {
     Grpc.setResponseSizeLimit(limitInBytes);
   }
+
+  /**
+   * resetConnection - only for Android
+   * @param message  - to debug where we are calling 'resetConnection'
+   * */
+  resetConnection(message: string): void {
+    if (!this.isAndroid()) {
+      return;
+    }
+    Grpc.resetConnection(message);
+  }
+  /**
+   * setUiLogEnabled - only for Android
+   * @param enable  - to debug where we are calling current grpc connection status
+   * in ui
+   * */
+  setUiLogEnabled(enable: boolean): void {
+    if (!this.isAndroid()) {
+      return;
+    }
+    Grpc.setUiLogEnabled(enable);
+  }
+  /**
+   * onConnectionStateChange - only for Android
+   * grpc connection different state
+   * * */
+  onConnectionStateChange(): void {
+    if (!this.isAndroid()) {
+      return;
+    }
+    Grpc.onConnectionStateChange();
+  }
+  /**
+   * enterIdle - only for Android
+   * set grpc connection state to idle
+   * * */
+  enterIdle(): void {
+    if (!this.isAndroid()) {
+      return;
+    }
+    Grpc.enterIdle();
+  }
+
   unaryCall(
     method: string,
     data: Uint8Array,
@@ -291,6 +339,13 @@ export class GrpcClient {
 
     return call;
   }
+
+
+
+  private isAndroid(): Boolean {
+    return Platform.OS == 'android';
+  }
+
 }
 
 export { Grpc };

@@ -1,6 +1,6 @@
 /* eslint-disable eslint-comments/no-unlimited-disable */
 import { ClientStreamingCall, DuplexStreamingCall, mergeRpcOptions, MethodInfo, RpcOptions, RpcOutputStreamController, RpcStatus, RpcTransport, ServerStreamingCall, UnaryCall } from '@protobuf-ts/runtime-rpc';
-import { GrpcClient, GrpcMetadata } from '@mitch528/react-native-grpc';
+import { GrpcClient, GrpcMetadata } from '@krishnafkh/react-native-grpc';
 import { AbortSignal } from 'abort-controller';
 
 /* eslint-disable */
@@ -32,11 +32,11 @@ export class RNGrpcTransport implements RpcTransport {
       });
     }
 
-    const response = call.response.then(resp => method.O.fromBinary(resp));
+    const response = call.response.then((resp: any) => method.O.fromBinary(resp));
     const status = call.trailers.then<RpcStatus, RpcStatus>(() => ({
       code: 0,
       detail: '',
-    } as any), ({ error, code }) => ({
+    } as any), ({ error, code }: any) => ({
       code: code,
       detail: error
     }));
@@ -52,14 +52,14 @@ export class RNGrpcTransport implements RpcTransport {
     const status = call.trailers.then<RpcStatus, RpcStatus>(() => ({
       code: 0,
       detail: '',
-    } as any), ({ error, code }) => ({
+    } as any), ({ error, code }: any) => ({
       code: code,
       detail: error
     }));
 
     const outStream = new RpcOutputStreamController<O>();
 
-    call.responses.on('data', (data) => {
+    call.responses.on('data', (data: any) => {
       outStream.notifyMessage(method.O.fromBinary(data));
     });
 
@@ -69,7 +69,7 @@ export class RNGrpcTransport implements RpcTransport {
       }
     });
 
-    call.responses.on('error', (reason) => {
+    call.responses.on('error', (reason: any) => {
       outStream.notifyError(reason);
     });
 

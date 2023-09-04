@@ -1,6 +1,5 @@
 package com.reactnativegrpc;
-import android.util.Log;
-import android.widget.Toast;
+
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
@@ -42,10 +41,9 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   private boolean keepAliveEnabled = false;
   private Integer keepAliveTime;
   private Integer keepAliveTimeout;
+  private boolean isUiLogEnabled = false;
 
   private ManagedChannel managedChannel = null;
-
-  private boolean isUiLogEnabled = false;
 
   public GrpcModule(ReactApplicationContext context) {
     this.context = context;
@@ -70,34 +68,29 @@ public class GrpcModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void setHost(String host) {
     this.host = host;
-    this.handleOptionsChanged();
   }
 
   @ReactMethod
   public void setInsecure(boolean insecure) {
     this.isInsecure = insecure;
-    this.handleOptionsChanged();
   }
 
   @ReactMethod
-  public void setCompression(Boolean enable, String compressorName, String limit) {
+  public void setCompression(Boolean enable, String compressorName) {
     this.withCompression = enable;
     this.compressorName = compressorName;
-    this.handleOptionsChanged();
   }
 
   @ReactMethod
   public void setResponseSizeLimit(int limit) {
     this.responseSizeLimit = limit;
-    this.handleOptionsChanged();
   }
 
   @ReactMethod
-  public void setKeepalive(boolean enabled, int time, int timeout) {
+  public void setKeepAlive(boolean enabled, int time, int timeout) {
     this.keepAliveEnabled = enabled;
     this.keepAliveTime = time;
     this.keepAliveTimeout = timeout;
-    this.handleOptionsChanged();
   }
 
   @ReactMethod
@@ -333,13 +326,12 @@ public class GrpcModule extends ReactContextBaseJavaModule {
     if (path.startsWith("/")) {
       path = path.substring(1);
     }
-
     return path;
   }
 
-  private void handleOptionsChanged() {
+  @ReactMethod
+  public void initGrpcChannel() {
     if (this.managedChannel != null) {
-      this.managedChannel.resetConnectBackoff();
       this.managedChannel.shutdown();
     }
     this.managedChannel = createManagedChannel();
@@ -360,7 +352,7 @@ public class GrpcModule extends ReactContextBaseJavaModule {
       channelBuilder = channelBuilder
         .keepAliveWithoutCalls(true)
         .keepAliveTime(keepAliveTime, TimeUnit.SECONDS)
-        .keepAliveTimeout(keepAliveTime, TimeUnit.SECONDS);
+        .keepAliveTimeout(keepAliveTimeout, TimeUnit.SECONDS);
     }
 
     managedChannel = channelBuilder.build();
@@ -369,7 +361,11 @@ public class GrpcModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void resetConnection(final String message){
-    handleOptionsChanged();
+    if(null == managedChannel) return;
+
+    this.managedChannel.resetConnectBackoff();
+
+    this.initGrpcChannel();
 
     showToast("resetConnection "+message);
   }
